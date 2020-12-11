@@ -1,105 +1,61 @@
 # Complete project details at https://RandomNerdTutorials.com
 
 from umqtt.simple import MQTTClient
+print(gc.mem_free())
 
 from lightEffects import LightEffects
 import ujson
 import time
 import sys
+import webrepl
+import netconfig
 
-'''
-message:
-{ method: colorWipe,
-  red: 0,
-  green: 0,
-  blue: 0,
-  speedDelay: 30
-}
-'''
+mqdepth = 0
 
 def mqhandler(topic, msgraw):
+  global mqdepth
+  mqdepth += 1
+  print(msgraw)
   msgs = ujson.loads(msgraw.decode('utf-8'))
-  if type(msgs) is dict: msgs = [msgs]
-  for msg in msgs:
-    methodName = msg.pop('method')
-    method = getattr(le, methodName)
-    repeatCount = 1 if 'repeat' not in msg else msg.pop('repeat')
-    try:
-      for i in range(repeatCount):
-        method(**msg)
-        mqtt.check_msg()
-      print('returned OK')
-    except:
-      print('exception: ', sys.exc_info()[0])      
+  print(msgs)
+  
+  if type(msgs) is dict:
+    msgs = [msgs]
+  while True:
+    for m in msgs:
+      msg = m.copy()
+      methodName = msg.pop('method')
+      print(methodName)
+      method = getattr(le, methodName)
+      repeatCount = 1 if 'repeat' not in msg else msg.pop('repeat')
+      print(repeatCount)
+      try:
+        for i in range(repeatCount):
+          method(**msg)
+        print('returned OK')
+      except:
+        sys.print_exception()
+        return
+    mqtt.check_msg()
 
-mqtt = MQTTClient("upy-led1", "192.168.0.137", 1883)
+mqtt = MQTTClient(netconfig.mqid, netconfig.mqhost, netconfig.mqport)
 mqtt.set_callback(mqhandler)
 mqtt.connect();
-mqtt.subscribe('/pyled1/pattern')
-mqtt.publish('/pyled1/ipaddr', sta.ifconfig()[0], True)
+print(netconfig.iptopic)
+print(sta.ifconfig()[0])
+mqtt.publish(netconfig.iptopic,sta.ifconfig()[0],True) #retained message
+mqtt.subscribe(netconfig.topic)
 
 # number of pixels
 n = 14
 # strip control gpio
 p = 2
 
-le = LightEffects(neopin = 2, num = 30)
+le = LightEffects(neopin = 2, num = netconfig.ledcount)
+
+webrepl.start()
 
 while True:
   mqtt.wait_msg()
-
-
-for i in range(5):
-  le.cylonForwardBG(128,0,0,0,255,0,6,30)
-
-time.sleep(5)
-
-for i in range(5):
-  le.cylonBackwardBG(0,0,255,64,64,64,6,30)
-  
-time.sleep(5)
-
-
-le.rainbowCycle(1)
-le.colorWipe(0,0,0,30)
-# le.rainbowCycle(10)
-# le.colorWipe(0,0,0,30)
-
-'''
-for i in range(40,0,-10):
-  le.cylonBounce(255,0,0,6,i,30)
-
-le.cylonBounceBG(255,0,0,0,255,0,6,30)
-le.cylonBounceBG(255,0,0,0,255,0,6,30)
-le.cylonBounceBG(0,255,0,255,0,0,6,30)
-le.cylonBounceBG(0,255,0,255,0,0,6,30)
-
-le.colorWipe(0,0,0, 30)
-
-le.twinkleRandom(120,120, False)
-
-#le.colorWipe(0,0,0, 30)
-#le.twinkleRandom(120,300,True)
-
-le.colorWipe(0,255,0, 30)
-  
-for i in range(120):
-  le.sparkleBG(255,0, 0, 0, 64, 0, 120)
-
-le.colorWipe(255,0,0, 30)
-
-for i in range(120):
-  le.sparkleBG(0, 255, 0, 48,0,0, 120)
-'''
-
-le.colorWipe(255,0,0,30)
-le.colorWipe(0,255,0, 30)
-le.colorWipe(96,96,96, 30)
-
-
-
-
-
-
 
 

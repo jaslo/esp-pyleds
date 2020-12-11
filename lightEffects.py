@@ -14,6 +14,7 @@ class LightEffects:
     self.num = num
     self.np = neopixel.NeoPixel(machine.Pin(neopin), num)
     self.setAll(0,0,0)
+    self.showStrip()
 
   def showStrip(self):
     self.np.write()
@@ -264,27 +265,41 @@ class LightEffects:
     
   
   def theaterChase(self, red, green, blue, speedDelay):
-    for j in range(0,10):
-      for q in range(0,3):
-        for i in range(0, self.num):
-          self.setPixel(i+q, red, green, blue)
+    print('in theaterChase')
+    for j in range(10):
+      for q in range(3):
+        for i in range(0, self.num, 3):
+          self.setPixel((i+q) % self.num, red, green, blue)
         self.showStrip()
         delay(speedDelay)
         
         for i in range(0, self.num, 3):
-          self.setPixel(i+q, 0, 0, 0)
+          self.setPixel((i+q) % self.num, 0, 0, 0)
+  
+  def theaterChaseBG(self, red, green, blue, bgred, bgblue, bggreen, speedDelay):
+    print('in theaterChase')
+    for j in range(10):
+      for q in range(3):
+        for i in range(0, self.num, 3):
+          self.setPixel((i+q) % self.num, red, green, blue)
+        self.showStrip()
+        delay(speedDelay)
         
-  def theatreChaseRainbow(self, speedDelay):
-    for j in range(0,256):
+        for i in range(0, self.num, 3):
+          self.setPixel((i+q) % self.num, bgred, bgblue, bggreen)
+          
+  def theaterChaseRainbow(self, speedDelay):
+    for j in range(256):
       for q in range(0,3):
         for i in range(0, self.num,3):
           c = self.wheel((i+j) % 255)
-          self.setPixel(i+q, **c)
+          self.setPixel(i+q, *c)
         self.showStrip()
         delay(speedDelay)
         for i in range(0, self.num,3):
           self.setPixel(i+q, 0, 0, 0)
             
+
 
 
 
