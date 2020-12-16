@@ -1,12 +1,19 @@
 
 import machine, neopixel
 import time
-from random1 import randrange
+import urandom
 
 def delay(ms):
   time.sleep_ms(ms)
-
-
+  
+def randint(max):
+    min = 0
+    span = max - min
+    div = 0x3fffffff // span
+    offset = urandom.getrandbits(30) // div
+    val = min + offset
+    return val
+    
 class LightEffects:
   
   def __init__(self, neopin, num):
@@ -112,93 +119,43 @@ class LightEffects:
     # better to cycle through the eyesize and clear to bg  
     self.setAll(bgred,bggreen,bgblue)
       
-  def newKITT(self, red, green, blue, eyeSize, speedDelay, returnDelay):
-    self.rightToLeft(red, green, blue, eyeSize, speedDelay, returnDelay)
-    self.leftToRight(red, green, blue, eyeSize, speedDelay, returnDelay)
-    self.outsideToCenter(red, green, blue, eyeSize, speedDelay, returnDelay)
-    self.centerToOutside(red, green, blue, eyeSize, speedDelay, returnDelay)
-    self.leftToRight(red, green, blue, eyeSize, speedDelay, returnDelay)
-    self.rightToLeft(red, green, blue, eyeSize, speedDelay, returnDelay)
-    self.outsideToCenter(red, green, blue, eyeSize, speedDelay, returnDelay)
-    self.centerToOutside(red, green, blue, eyeSize, speedDelay, returnDelay)
-    
-  def centerToOutside(self, red, green, blue, eyeSize, speedDelay, returnDelay):
-    for i in range((self.num-eyeSize)/2, 0, -1):
-      self.setAll(0,0,0)
-      self.setPixel(i, red/10, green/10, blue/10)
-      for j in range(1,eyeSize):
-        self.setPixel(i+j, red, green, blue)
-      self.setPixel(i+eyeSize+1, red/10, green/10, blue/10)
-      self.setPixel(self.num-i, red/10, green/10, blue/10)
-      for j in range(1, eyeSize):
-        self.setPixel(self.num-i-j, red, green, blue)
-      self.setPixel(self.num-i-eyeSize-1, red/10, green/10, blue/10)
-      self.showStrip()
-      delay(speedDelay)
-    delay(returnDelay)
-    
-  def outsideToCenter(self, red, green, blue, eyeSize, speedDelay, returnDelay):
-    for i in range((self.num-eyeSize)/2):
-      self.setAll(0,0,0)
-      self.setPixel(i, red/10, green/10, blue/10)
-      for j in range(1,eyeSize+1):
-        self.setPixel(i+j, red, green, blue)
-      self.setPixel(i+eyeSize+1, red/10, green/10, blue/10)
-      self.setPixel(self.num-i, red/10, green/10, blue/10)
-      for j in range(1, eyeSize+1):
-        self.setPixel(self.num-i-j, red, green, blue)
-      self.setPixel(self.num-i-eyeSize-1, red/10, green/10, blue/10)
-      self.showStrip()
-      delay(speedDelay)
-    delay(returnDelay)
-
-  def leftToRight(self, red, green, blue, eyeSize, speedDelay, returnDelay):
-    for i in range(self.num-eyeSize-2):
-      self.setAll(0,0,0)
-      self.setPixel(i, red/10, green/10, blue/10)
-      for j in range(1,eyeSize+1):
-        self.setPixel(i+j, red, green, blue)
-      self.setPixel(i+eyeSize+1, red/10, green/10, blue/10)
-      self.showStrip()
-      delay(speedDelay)
-    delay(returnDelay)
-    
-  def rightToLeft(self, red, green, blue, eyeSize, speedDelay, returnDelay):
-    for i in range(self.num-eyeSize-2, 0, -1):
-      self.setAll(0,0,0)
-      self.setPixel(i, red/10, green/10, blue/10)
-      for j in range(1,eyeSize+1):
-        self.setPixel(i+j, red, green, blue)
-      self.setPixel(i+eyeSize+1, red/10, green/10, blue/10)
-      self.showStrip()
-      delay(speedDelay)
-    delay(returnDelay)
-    
-    
-  def twinkle(self, red, green, blue, count, speedDelay, onlyOne):
+  def twinkle(self, red, green, blue, count, speedDelay, onlyOne = False):
+    print('in twinkle')
     self.setAll(0,0,0)
     for i in range(count):
-      self.setPixel(randrange(self.num), red, green, blue)
+      self.setPixel(randint(self.num), red, green, blue)
       self.showStrip()
       delay(speedDelay)
       if onlyOne:
         self.setAll(0,0,0)
-      
-    
-  def twinkleRandom(self, count, speedDelay, onlyOne):
+  
+  def twinkleRandom1(self, count, speedDelay):
     self.setAll(0,0,0)
     for i in range(count):
-      b = randrange(256)
-      g = 0 if b == 255 else randrange(256-b)
-      r = 0 if g == 255 else randrange(256-g)
-      self.setPixel(randrange(self.num), r, g, b);
+      b = randint(512)
+      if b > 255:
+        r = g = b = 0
+      else:
+        g = 0 if b == 255 else randint(256-b)
+        r = 0 if g == 255 else randint(256-g)
+      self.setPixel(randint(self.num), r, g, b);
+      self.showStrip()
+      delay(speedDelay)
+    
+  def twinkleRandom(self, count, speedDelay, onlyOne = False):
+    self.setAll(0,0,0)
+    for i in range(count):
+      b = randint(256)
+      g = 0 if b == 255 else randint(256-b)
+      r = 0 if g == 255 else randint(256-g)
+      self.setPixel(randint(self.num), r, g, b);
       self.showStrip()
       delay(speedDelay)
       if onlyOne:
         self.setAll(0,0,0)
   
   def sparkle(self, red, green, blue, speedDelay):
-    pixel = randrange(self.num)
+    pixel = randint(self.num)
     self.setPixel(pixel, red, green, blue)
     self.showStrip()
     delay(speedDelay)
@@ -206,7 +163,7 @@ class LightEffects:
     
   
   def sparkleBG(self, red, green, blue, bgred, bggreen, bgblue, speedDelay):
-    pixel = randrange(self.num)
+    pixel = randint(self.num)
     self.setPixel(pixel, red, green, blue)
     self.showStrip()
     delay(speedDelay)
@@ -214,7 +171,7 @@ class LightEffects:
 
   def snowSparkle(self, red, green, blue, sparkleDelay, speedDelay):
     self.setAll(red, green, blue)
-    pixel = randrange(self.num)
+    pixel = randint(self.num)
     self.setPixel(pixel, 0xff, 0xff, 0xff);
     self.showStrip()
     delay(sparkleDelay)
@@ -222,17 +179,18 @@ class LightEffects:
     self.showStrip()
     delay(speedDelay)
     
-#  def runningLights(self, red, green, blue, waveDelay):
-#    position = 0
-#    for i in range(self.num*2):
-#      position++
-#      for j in range(self.num):
-#        level = Math.sin(
-  
-     
   def colorWipe(self, red, green, blue, speedDelay):
     for i in range(0, self.num):
       self.setPixel(i, red, green, blue)
+      self.showStrip()
+      delay(speedDelay)
+  
+  def randomWipe(self, speedDelay):
+    for i in range(0, self.num):
+      b = randint(256)
+      g = 0 if b == 255 else randint(256-b)
+      r = 0 if g == 255 else randint(256-g)
+      self.setPixel(i, r, g, b)
       self.showStrip()
       delay(speedDelay)
   
@@ -293,12 +251,15 @@ class LightEffects:
       for q in range(0,3):
         for i in range(0, self.num,3):
           c = self.wheel((i+j) % 255)
-          self.setPixel(i+q, *c)
+          self.setPixel((i+q) % self.num, *c)
         self.showStrip()
         delay(speedDelay)
         for i in range(0, self.num,3):
-          self.setPixel(i+q, 0, 0, 0)
+          self.setPixel((i+q) % self.num, 0, 0, 0)
             
+
+
+
 
 
 
