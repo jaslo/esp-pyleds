@@ -132,7 +132,7 @@ class LightEffects:
   def twinkleRandom1(self, count, speedDelay):
     self.setAll(0,0,0)
     for i in range(count):
-      b = randint(512)
+      b = randint(512)  # 0-255 on, 256-511 off
       if b > 255:
         r = g = b = 0
       else:
@@ -168,6 +168,18 @@ class LightEffects:
     self.showStrip()
     delay(speedDelay)
     self.setPixel(pixel, bgred, bggreen, bgblue)
+
+  def sparkleBGCount(self, red, green, blue, bgred, bggreen, bgblue, count, speedDelay):
+    pixels = []
+    for i in range(count):
+      pixel = randint(self.num)
+      self.setPixel(pixel, red, green, blue)
+      pixels.append(pixel)
+      
+    self.showStrip()
+    delay(speedDelay)
+    for i in range(count):
+      self.setPixel(pixels[i], bgred, bggreen, bgblue)
 
   def snowSparkle(self, red, green, blue, sparkleDelay, speedDelay):
     self.setAll(red, green, blue)
@@ -257,6 +269,7 @@ class LightEffects:
         for i in range(0, self.num,3):
           self.setPixel((i+q) % self.num, 0, 0, 0)
             
+
 
 
 
